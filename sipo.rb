@@ -9,6 +9,8 @@ require 'simple-spreadsheet'
 
 #do tříd
 
+ORG_NUMBER = 112062
+
 options = {}
 
 OptionParser.new do |parser|
@@ -159,7 +161,6 @@ class HashExport
   end 
 end
 class CreateData
-  ORG_NUMBER = 112062
   def current_month
     Date.today.strftime("%m")
   end
