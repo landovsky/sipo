@@ -23,8 +23,8 @@ class TestCol < Test::Unit::TestCase
   def test_output
     assert_equal('123456', Col.new(@config[:obdobi],123456).out)
     assert_equal('123456', Col.new(@config[:obdobi],123456.0).out)
-    assert_equal('   1000,00', Col.new(@config[:predpis],1000).out)
-    assert_equal('    1000,0', Col.new(@config[:predpis2],1000).out)
+    assert_equal('   1000.00', Col.new(@config[:predpis],1000).out)
+    assert_equal('    1000.0', Col.new(@config[:predpis2],1000).out)
     assert_equal('doklad    ', Col.new(@config[:text],'doklad').out)
   end
 end

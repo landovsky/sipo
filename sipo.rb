@@ -9,7 +9,7 @@ require 'simple-spreadsheet'
 
 #do tříd
 
-ORG_NUMBER = 112062
+ORG_NUMBER = 112882
 
 options = {}
 
@@ -52,7 +52,7 @@ class Col
   end
   def out
     decimals = "" if @decimals == 0
-    decimals = "," + 0.to_s * @decimals if @decimals > 0 #preparation of format for sprintf
+    decimals = "." + 0.to_s * @decimals if @decimals > 0 #preparation of format for sprintf
     @value = sprintf("%d#{decimals}",@value) if @value.respond_to?(:floor) #format decimals if value is a number
     raise ArgumentError.new("sloupec \"#{@name}\", řádek #{@y}: hodnota nesmi byt prazdna") if @value.to_s.length == 0 && @mandatory == true
     raise ArgumentError.new("sloupec \"#{@name}\", řádek #{@y}: hodnota #{@value} nesplnuje pozadovanou delku") if @value.to_s.length < @length && @full == true
@@ -91,7 +91,6 @@ class FileSave
     @content = content
     begin
       output = File.new(@filename, "w")
-      @content = HashExport.new(@content).export if @content.class == Hash
       output.syswrite(@content.encode!(Encoding::Windows_1250)) #encode
       puts "\nSoubor #{@filename} zapsán."
     rescue
@@ -127,12 +126,7 @@ class Dispatch
     data[[3,1]] = Col.new(config[:pocet_vet],@rows).out
     data[[4,1]] = Col.new(config[:datum_vytvoreni],CreateData.new.created_date).out
   
-    if @options[:screen] #output on screen or write to file
-      puts "\nPrůvodka změnového souboru"
-      puts HashExport.new(data).export
-    else
-      FileSave.new("OP#{@org_number}.TXT", data)
-    end
+    FileSave.new("OP#{@org_number}.TXT", HashExport.new(data).export)
   end
 end
 class HashExport  
@@ -162,7 +156,7 @@ class HashExport
 end
 class CreateData
   def current_month
-    Date.today.strftime("%m")
+    Date.today.next_month.strftime("%m")
   end
   def organization_number
     ORG_NUMBER
@@ -228,20 +222,22 @@ if options[:change] then
    
   config.keys.each do |key| #cycle through all columns defined by config as "key"
     cols[x] = Col.new(config[key]) #create data column in cols array
-    2.upto(xls.last_row) do |y|
+    2.upto(xls.last_row) do |y| #2 >> předpokládá se, že dodaný soubor má záhlaví
       cols[x].value = xls.cell(y,x)
       data[[x,y-1]] = cols[x].out #output formatted data to data hash
     end
     x += 1
   end
 
+  out = HashExport.new(data)
   if options[:screen] then #output on screen or write to file
   #puts data
     puts "\nZměnový soubor"
-    puts HashExport.new(data).export
+    puts out.export
+    puts "\nZáznamů: #{out.rows}"
   else
-    FileSave.new("ZM#{CreateData.new.organization_number}.TXT", data)
-    Dispatch.new(CreateData.new.organization_number,CreateData.new.current_month,xls.last_row,options)
+    FileSave.new("ZM#{CreateData.new.organization_number}.TXT", out.export)
+    Dispatch.new(CreateData.new.organization_number,CreateData.new.current_month,out.rows,options)
   end
 end
 
@@ -379,3 +375,5 @@ while options[:compare] do
       end
   end
 end
+
+puts "\n"
