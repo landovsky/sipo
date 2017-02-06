@@ -178,7 +178,7 @@ class Config
     @config[:prazdne_pole] = ["prazdne pole",6,0,false,false,:right]
     @config[:kod_poplatku] = ["kod poplatku",3,0,true,false,:right]
     @config[:predpis] = ["predpis",9,2,true,false,:right]
-    @config[:puvodni_predpis] = ["puvodni predpis",12,2,false,false,:right]
+    @config[:puvodni_predpis] = ["puvodni predpis",9,2,false,false,:right]
     @config[:text] = ["text dokladu",18,0,false,false,:left]
     @config
   end
