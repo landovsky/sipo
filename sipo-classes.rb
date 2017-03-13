@@ -34,6 +34,7 @@ class Col
     raise ArgumentError.new("sloupec \"#{@name}\", řádek #{@y}: hodnota nesmi byt prazdna") if @value.to_s.length == 0 && @mandatory == true
     raise ArgumentError.new("sloupec \"#{@name}\", řádek #{@y}: hodnota #{@value} nesplnuje pozadovanou delku (#{@length})") if @value.to_s.length < @length && @full == true
     raise ArgumentError.new("sloupec \"#{@name}\", řádek #{@y}: hodnota #{@value} nesmi byt delsi nez #{@length}") if @value.to_s.length > @length
+    raise ArgumentError.new("sloupec \"#{@name}\", řádek #{@y}: hodnota #{@value} není validní SIPO ") if @name == "spojovaci cislo" && !SipoValidator.new(@value).sipo_valid?
     if @align == :right then @value = SEPARATOR * (@length - @value.to_s.length) + @value.to_s + COLUMN
       else @value = @value.to_s + SEPARATOR * (@length - @value.to_s.length) + COLUMN
       end
@@ -97,7 +98,7 @@ class Dispatch
     @options = options
     #puts "org_no #{@org_number}, month: #{@month}, rows: #{@rows}, options: #{@options}"
     data = Hash.new
-    config = Config.new.zmena_pruvodka
+    config = Configurace.new.zmena_pruvodka
     data[[1,1]] = Col.new(config[:cislo_organizace],@org_number).out
     data[[2,1]] = Col.new(config[:obdobi],ConvertToPeriod.new(@month).do).out
     data[[3,1]] = Col.new(config[:pocet_vet],@rows).out
@@ -142,7 +143,7 @@ class CreateData
     Date.today.strftime("%d%m%Y")
   end
 end
-class Config
+class Configurace
   def initialize
     @config = Hash.new() #nazev, delka, počet desetinných míst čísel, povinnost, vyplňuje celou délku, zarovnání
   end
@@ -175,4 +176,25 @@ class Config
     @config[:datum_podani] = ["datum podani",10,0,true,true]
     @config
   end
+end
+class SipoValidator
+  def initialize(sipo)
+    @sipo = sipo
+  end
+  def sipo_valid?
+     sipo_chk = @sipo.to_s.chars.last.to_i #kontrolní číslo
+     weight = [3,7,3,1,7,3,1,7,3,1]
+     s = @sipo.to_s.chars.first(9).map(&:to_i) #číslo SIPO bez kontrolního čísla
+     product = 0 #kontrolní součet
+     pointer = 0
+     @sipo.to_s.chars.first(9).each do |sip|
+       product += sip.to_i * weight[pointer].to_i
+       pointer += 1
+     end
+     product_last = product.to_s.chars.last.to_i
+     outcome = true
+     outcome = false if product_last == 0 && product_last != sipo_chk
+     outcome = false if product_last != 0 && 10 - product_last != sipo_chk
+     outcome
+   end
 end

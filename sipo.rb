@@ -39,7 +39,7 @@ if options[:change] then
   $VERBOSE = original_warning_level
   data = Hash.new
   cols = Array.new
-  config = Config.new.zmena
+  config = Configurace.new.zmena
   x = 1 #column number
    
   config.keys.each do |key| #cycle through all columns defined by config as "key"
@@ -68,7 +68,7 @@ end
 
 #PLATBY
 if options[:paid] then
-  config = Config.new.prijate_platby
+  config = Configurace.new.prijate_platby
   req_size = 1 #zahrnuje "\n"
   config.each_key do |key| #sečte délku polí dle konfigurace = délka řádku
     req_size += config[key][1]
@@ -168,7 +168,7 @@ while options[:compare] do
   end
   
   #výroba dat
-  config = Config.new.zmena
+  config = Configurace.new.zmena
   data = Hash.new
   y = 1
   #cyklus přes položky změn
