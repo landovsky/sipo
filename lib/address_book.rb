@@ -2,7 +2,7 @@
 class AddressBook
   attr_reader :contacts, :book
 
-  BOOK = 'spec/fixtures/adresar.csv'.freeze
+  BOOK = '/app/spec/fixtures/adresar.csv'.freeze
 
   def initialize
     @file     = load_book

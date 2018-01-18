@@ -1,3 +1,5 @@
+require 'lib/types'
+
 class Contact < Dry::Struct
   constructor_type :strict
 

@@ -17,22 +17,30 @@
 # https://stackoverflow.com/questions/12884711/how-to-send-email-via-smtp-with-rubys-mail-gem
 # zpracovane prejmenovat
 
+$LOAD_PATH.unshift '/app'
+
 require 'pry'
 require 'dry-types'
 require 'dry-struct'
 require 'dry-validation'
-require 'lib/types'
+require 'mail'
 
 Dir['/app/lib/*.rb'].each { |file| require file }
+Dir['/app/lib/mailer/*.rb'].each { |file| require file }
 
-$LOAD_PATH.unshift '/app'
+# Desc
+class SipoMailer
+  def self.perform
+    Mailer::Config.setup
+    
+    ARGV.each do |a|
+      puts "Argument: #{a}"
+    end
 
-ARGV.each do |a|
-  puts "Argument: #{a}"
-end
-
-Timer.elapsed do
-  files = Dir[Dir.pwd + '/*.*'].each { |file| p file }
-  files = files.map {|path| Attachment.new(path) }
-  p('Žádné soubory ke zpracování') and exit unless files.any? { |i| i.valid? }
+    Timer.elapsed do
+      files = Dir[Dir.pwd + '/*.*'].each { |file| p file }
+      files = files.map { |path| Attachment.new(path) }
+      p('Žádné soubory ke zpracování') and exit unless files.any?(&:valid?)
+    end
+  end
 end
