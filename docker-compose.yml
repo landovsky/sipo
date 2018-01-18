@@ -1,0 +1,18 @@
+version: "2"
+
+volumes:
+  gem_store_240:
+    external: true
+
+services:
+  web:
+    #image: web:ruby
+    build:
+      context: .
+    command: bash
+    env_file: .env
+    tty: true
+    stdin_open: true
+    volumes:
+      - gem_store_240:/gems
+      - /Users/landovsky/git/sipo:/app

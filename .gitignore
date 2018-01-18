@@ -1,2 +1,4 @@
 local_data/**
 docs/**
+.env
+.DS_Store
