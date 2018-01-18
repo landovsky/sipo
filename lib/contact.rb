@@ -1,8 +1,19 @@
-class Contact
-  attr_reader :id, :email
+class Contact < Dry::Struct
+  constructor_type :strict
 
-  def initialize(params)
-    @id     = params.fetch('cislo')
-    @email  = params.fetch('email')
+  attribute :cislo, Types::String
+  attribute :email, Types::String
+
+  def id
+    cislo
+  end
+
+  def self.valid?(params)
+    schema = Dry::Validation.Schema do
+      required(:cislo).filled
+      required(:email).filled
+    end
+
+    schema.call(params).errors.empty?
   end
 end

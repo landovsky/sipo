@@ -16,3 +16,4 @@ services:
     volumes:
       - gem_store_240:/gems
       - /Users/landovsky/git/sipo:/app
+      - /Users/landovsky/git/sipo/docs:/docs

@@ -1,5 +1,4 @@
-FROM landovsky/ruby:latest
-
+FROM landovsky/ruby:2.4.0
 
 ## alias musi byt v .bashrc
 RUN echo '---' > ~/.gemrc \

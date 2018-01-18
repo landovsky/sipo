@@ -1,13 +1,6 @@
 #!/usr/bin/env ruby
 
-$:.unshift '/app'
-
-require 'pry'
-require 'lib/address_book'
-require 'lib/attachment'
-
 ## MVP (demo)
-# diakritika
 # seznam id a emailu
 # poslani emailu s telem a prilohou
 # kompilace do exe
@@ -24,8 +17,22 @@ require 'lib/attachment'
 # https://stackoverflow.com/questions/12884711/how-to-send-email-via-smtp-with-rubys-mail-gem
 # zpracovane prejmenovat
 
-ARGV.each do|a|
+require 'pry'
+require 'dry-types'
+require 'dry-struct'
+require 'dry-validation'
+require 'lib/types'
+
+Dir['/app/lib/*.rb'].each { |file| require file }
+
+$LOAD_PATH.unshift '/app'
+
+ARGV.each do |a|
   puts "Argument: #{a}"
 end
 
-p Dir.pwd
+Timer.elapsed do
+  files = Dir[Dir.pwd + '/*.*'].each { |file| p file }
+  files = files.map {|path| Attachment.new(path) }
+  p('Žádné soubory ke zpracování') and exit unless files.any? { |i| i.valid? }
+end
