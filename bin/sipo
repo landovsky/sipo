@@ -5,5 +5,3 @@ $LOAD_PATH.unshift '/app', 'app/lib'
 require 'sipo_mailer'
 
 SipoMailer.perform
-
-pry
