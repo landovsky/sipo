@@ -1,19 +1,20 @@
 # Mailer sender
 class Email
-  # odeslani emailu
-  # stav odesilani emailu
-
   class DeliveryError < StandardError
   end
 
   class Response
     attr_reader :response
-    def initialize(response)
+    def initialize(response = nil)
       @response = response
     end
 
     def sent?
-      @response.errors.empty?
+      if @response.is_a? Mail
+        @response&.errors.empty?
+      else
+        false
+      end
     end
   end
 
@@ -38,21 +39,29 @@ class Email
   end
 
   def send
-    email = Mail.new
-    email.to = @to
-    email.from = @from
+    email.deliver!
+  rescue SocketError
+    print "\n\nChyba při posílání emailu: adresa " \
+      "#{Mail.delivery_method.settings[:address]} není dostupná.\n"
+    exit
+  rescue Net::SMTPAuthenticationError
+    print "\n\nChyba při posílání emailu: " \
+      "chybné přihlašovací údaje pro emailovou schránku.\n"
+    exit
+  rescue Net::OpenTimeout
+    print "\n\nChyba při posílání emailu: vypršel časový limit "\
+      "při spojení s emailovým serverem.\n"
+    exit
+  end
+
+  def email
+    email         = Mail.new
+    email.to      = @to
+    email.from    = @from
     email.subject = @subject
-    email.body = email_body
+    email.body    = email_body
     email.add_file(@attachment.path) if @attachment
-    begin
-      email.deliver!
-    rescue SocketError
-      raise DeliveryError, "Chyba při posílání emailu: adresa #{Mail.delivery_method.settings[:address]} není dostupná."
-    rescue Net::SMTPAuthenticationError
-      raise DeliveryError, 'Chyba při posílání emailu: chybné přihlašovací údaje pro emailovou schránku.'
-    rescue Net::OpenTimeout
-      raise DeliveryError, 'Chyba při posílání emailu: vypršel časový limit při spojení s emailovým serverem.'
-    end
+    email
   end
 
   private

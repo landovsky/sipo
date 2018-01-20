@@ -7,11 +7,9 @@
 # cesty ve Windows
 
 ## TODOs
+# system clear / cls
 # kompilace do exe
-# Windows cesty
 # zpracovane prejmenovat
-
-$LOAD_PATH.unshift '/app'
 
 require 'pry'
 require 'dry-types'
@@ -20,6 +18,7 @@ require 'dry-validation'
 require 'mail'
 
 lib_path = File.expand_path('lib', File.dirname(__FILE__))
+$LOAD_PATH.unshift lib_path
 Dir["#{lib_path}/*.rb"].each { |file| require file }
 Dir["#{lib_path}/mailer/*.rb"].each { |file| require file }
 
@@ -39,12 +38,14 @@ module SipoMailer
   @address_book ||= AddressBook.new
 
   def self.perform
-    system('clear')
-
     files = Dir[Dir.pwd + '/*.*'] #.each { |file| p file }
-    files = files.map { |path| Attachment.new(path) }
+    files = files.map { |path| Attachment.new(path) }.select(&:valid?)
     files = files.reject { |file| file.processed? }
-    printf "Žádné soubory ke zpracování\n" and exit unless files.any?(&:valid?)
+
+    if files.none?    
+      printf "Žádné soubory ke zpracování\n"
+      exit
+    end
 
     printf "Našel jsem %d souborů ke zpracování.\n\n", files.count
 

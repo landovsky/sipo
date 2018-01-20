@@ -2,8 +2,6 @@
 class AddressBook
   attr_reader :contacts, :book
 
-  BOOK = '/app/spec/fixtures/adresar.csv'.freeze
-
   def initialize
     @file     = load_book
     @contacts = without_dups
@@ -29,10 +27,10 @@ class AddressBook
     dups      = ids.select { |id| ids.count(id) > 1 }.uniq
     return contacts if dups.empty?
 
-    p 'Duplicitní kontakty nebudou zpracovány:'
+    print "Duplicitní kontakty nebudou zpracovány:\n"
     dups.each do |dup_id|
       contacts.each do |contact|
-        p ' ' + contact.id + ': ' + contact.email if contact.id == dup_id
+        printf("  %s: %s\n", contact.id, contact.email) if contact.id == dup_id
       end
     end
 
@@ -40,9 +38,14 @@ class AddressBook
   end
 
   def load_book
-    open(BOOK)
+    file = SipoMailer.config.env['ADDRESS_BOOK']
+    if file.nil?
+      print "Do nastavení dejte cestu k CSV souboru adresáře.\n"
+      exit
+    end
+    open(file)
   rescue Errno::ENOENT
-    p 'Potřebuju adresář.csv'
+    print "Soubor #{file} nelze otevřít. Máte správně nastavenou cestu?\n"
     exit
   end
 
@@ -54,7 +57,8 @@ class AddressBook
         Contact.new(params)
       else
         row = contact.values.compact.join(', ')
-        p "Nepodařilo se zpracovat řádku adresáře: #{row}. Je správně oddělen středníkem?"
+        print "Nepodařilo se zpracovat řádku adresáře: #{row}. "\
+          "Je správně oddělen středníkem?\n"
         next
       end
     end.compact
